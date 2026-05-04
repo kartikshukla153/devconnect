@@ -1,8 +1,10 @@
+import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import User from "../models/User.js";
 
-/* ---------------- REGISTER ---------------- */
+/**
+ * REGISTER
+ */
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -11,9 +13,9 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: "All fields required" });
     }
 
-    const existingUser = await User.findOne({ email });
+    const existing = await User.findOne({ email });
 
-    if (existingUser) {
+    if (existing) {
       return res.status(400).json({ message: "User already exists" });
     }
 
@@ -25,7 +27,7 @@ export const registerUser = async (req, res) => {
       password: hashedPassword,
     });
 
-    return res.status(201).json({
+    res.status(201).json({
       message: "User registered successfully",
       user: {
         id: user._id,
@@ -33,18 +35,22 @@ export const registerUser = async (req, res) => {
         email: user.email,
       },
     });
+
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    console.log("REGISTER ERROR:", err);
+    res.status(500).json({ message: err.message });
   }
 };
 
-/* ---------------- LOGIN ---------------- */
+/**
+ * LOGIN
+ */
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Email & password required" });
+      return res.status(400).json({ message: "All fields required" });
     }
 
     const user = await User.findOne({ email });
@@ -59,14 +65,13 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // 🔥 SAME SECRET
     const token = jwt.sign(
       { id: user._id },
-      "devconnect_secret_key",
+      "secretkey",
       { expiresIn: "7d" }
     );
 
-    return res.json({
+    res.json({
       message: "Login successful",
       token,
       user: {
@@ -75,7 +80,9 @@ export const loginUser = async (req, res) => {
         email: user.email,
       },
     });
+
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    console.log("LOGIN ERROR:", err);
+    res.status(500).json({ message: err.message });
   }
 };

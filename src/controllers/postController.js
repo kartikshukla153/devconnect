@@ -11,7 +11,7 @@ export const createPost = async (req, res) => {
       return res.status(400).json({ message: "Content is required" });
     }
 
-    if (!req.user || !req.user.userId) {
+    if (!req.user?.userId) {
       return res.status(401).json({ message: "Unauthorized user" });
     }
 
@@ -26,31 +26,24 @@ export const createPost = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("CREATE POST ERROR:", error);
-    res.status(500).json({
-      message: "Error creating post",
-      error: error.message,
-    });
+    console.log("CREATE POST ERROR:", error);
+    res.status(500).json({ message: error.message });
   }
 };
 
 /**
- * GET POSTS (FEED)
+ * GET POSTS
  */
 export const getPosts = async (req, res) => {
   try {
     const posts = await Post.find()
       .populate("user", "name email")
-      .populate("comments.user", "name email")
       .sort({ createdAt: -1 });
 
-    res.status(200).json(posts);
+    res.json(posts);
 
   } catch (error) {
-    console.error("GET POSTS ERROR:", error);
-    res.status(500).json({
-      message: "Error fetching posts",
-      error: error.message,
-    });
+    console.log("GET POSTS ERROR:", error);
+    res.status(500).json({ message: error.message });
   }
 };
