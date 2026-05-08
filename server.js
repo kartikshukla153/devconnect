@@ -1,5 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
+import profileRoutes from "./src/routes/profileRoutes.js";
 import cors from "cors";
 import dotenv from "dotenv";
 
@@ -17,6 +18,7 @@ app.use(express.json());
 // routes
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/profile", profileRoutes);
 
 // test route
 app.get("/", (req, res) => {
