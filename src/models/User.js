@@ -25,6 +25,41 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "user",
     },
+
+    bio: {
+      type: String,
+      default: "",
+    },
+
+    skills: {
+      type: [String],
+      default: [],
+    },
+
+    github: {
+      type: String,
+      default: "",
+    },
+
+    linkedin: {
+      type: String,
+      default: "",
+    },
+
+    location: {
+      type: String,
+      default: "",
+    },
+
+    experience: {
+      type: String,
+      default: "",
+    },
+
+    profilePicture: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );
