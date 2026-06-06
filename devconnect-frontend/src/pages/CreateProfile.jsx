@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 function CreateProfile() {
   const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
     username: "",
@@ -17,6 +19,48 @@ function CreateProfile() {
     twitter: "",
   });
 
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(
+        "http://localhost:5000/api/profile/me",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const profile = res.data.profile;
+
+      if (profile) {
+        setFormData({
+          username: profile.username || "",
+          headline: profile.headline || "",
+          bio: profile.bio || "",
+          skills: profile.skills?.join(", ") || "",
+          location: profile.location || "",
+          github: profile.socialLinks?.github || "",
+          linkedin: profile.socialLinks?.linkedin || "",
+          portfolio: profile.socialLinks?.portfolio || "",
+          twitter: profile.socialLinks?.twitter || "",
+        });
+      }
+    } catch (err) {
+      console.log(
+        "NO EXISTING PROFILE:",
+        err.response?.data || err.message
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -24,7 +68,7 @@ function CreateProfile() {
     });
   };
 
-  const createProfile = async () => {
+  const saveProfile = async () => {
     try {
       const token = localStorage.getItem("token");
 
@@ -46,7 +90,7 @@ function CreateProfile() {
         }
       );
 
-      console.log("PROFILE CREATED:", res.data);
+      console.log("PROFILE SAVED:", res.data);
 
       navigate("/profile");
     } catch (err) {
@@ -57,17 +101,25 @@ function CreateProfile() {
 
       alert(
         err.response?.data?.message ||
-        "Failed to create profile"
+        "Failed to save profile"
       );
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#070A12] text-white flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#070A12] text-white flex justify-center items-center p-6">
       <div className="w-full max-w-2xl bg-white/5 border border-white/10 rounded-xl p-6">
 
         <h1 className="text-2xl font-bold mb-6">
-          Create Profile
+          Create / Edit Profile
         </h1>
 
         <input
@@ -134,11 +186,19 @@ function CreateProfile() {
           className="w-full p-3 mb-3 bg-black/30 border border-white/10 rounded"
         />
 
+        <input
+          name="twitter"
+          placeholder="Twitter URL"
+          value={formData.twitter}
+          onChange={handleChange}
+          className="w-full p-3 mb-5 bg-black/30 border border-white/10 rounded"
+        />
+
         <button
-          onClick={createProfile}
+          onClick={saveProfile}
           className="w-full py-3 bg-cyan-500 text-black rounded font-semibold"
         >
-          Create Profile
+          Save Profile
         </button>
 
       </div>
