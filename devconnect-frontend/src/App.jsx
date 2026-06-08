@@ -1,9 +1,11 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Feed from "./pages/Feed";
 import Profile from "./pages/Profile";
 import CreateProfile from "./pages/CreateProfile";
+import AddExperience from "./pages/AddExperience";
 
 function App() {
   const token = localStorage.getItem("token");
@@ -44,6 +46,14 @@ function App() {
         path="/create-profile"
         element={
           token ? <CreateProfile /> : <Navigate to="/login" />
+        }
+      />
+
+      {/* ADD EXPERIENCE */}
+      <Route
+        path="/add-experience"
+        element={
+          token ? <AddExperience /> : <Navigate to="/login" />
         }
       />
 
