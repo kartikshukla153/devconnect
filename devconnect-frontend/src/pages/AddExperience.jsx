@@ -126,7 +126,7 @@ function AddExperience() {
           rows="5"
           className="w-full p-3 mb-5 bg-black/30 border border-white/10 rounded"
         />
-
+    
         <button
           onClick={saveExperience}
           className="w-full py-3 bg-cyan-500 text-black rounded font-semibold"

@@ -6,6 +6,7 @@ import Feed from "./pages/Feed";
 import Profile from "./pages/Profile";
 import CreateProfile from "./pages/CreateProfile";
 import AddExperience from "./pages/AddExperience";
+import Developers from "./pages/Developers";
 
 function App() {
   const token = localStorage.getItem("token");
@@ -54,6 +55,14 @@ function App() {
         path="/add-experience"
         element={
           token ? <AddExperience /> : <Navigate to="/login" />
+        }
+      />
+
+      {/* DEVELOPERS */}
+      <Route
+        path="/developers"
+        element={
+          token ? <Developers /> : <Navigate to="/login" />
         }
       />
 
