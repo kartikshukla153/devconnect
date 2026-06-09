@@ -28,6 +28,36 @@ function Profile() {
     }
   };
 
+  const deleteExperience = async (expId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this experience?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.delete(
+        `http://localhost:5000/api/profile/experience/${expId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      fetchProfile();
+    } catch (err) {
+      console.log(err.response?.data || err.message);
+
+      alert(
+        err.response?.data?.message ||
+          "Failed to delete experience"
+      );
+    }
+  };
+
   useEffect(() => {
     fetchProfile();
   }, []);
@@ -181,6 +211,13 @@ function Profile() {
                       {exp.description}
                     </p>
                   )}
+
+                  <button
+                    onClick={() => deleteExperience(exp._id)}
+                    className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                  >
+                    Delete Experience
+                  </button>
                 </div>
               ))}
             </div>
