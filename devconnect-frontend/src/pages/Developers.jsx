@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 
 function Developers() {
@@ -70,12 +71,12 @@ function Developers() {
           Discover Developers
         </h1>
 
-        {/* SEARCH BAR */}
+        {/* SEARCH */}
         <div className="flex flex-col md:flex-row gap-3 mb-8">
 
           <input
             type="text"
-            placeholder="Search by skill (React, Java, MongoDB...)"
+            placeholder="Search by skill..."
             value={skill}
             onChange={(e) => setSkill(e.target.value)}
             className="flex-1 p-3 bg-white/5 border border-white/10 rounded-lg"
@@ -127,7 +128,7 @@ function Developers() {
                   </p>
                 )}
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mb-5">
                   {profile.skills?.map((skill, index) => (
                     <span
                       key={index}
@@ -137,6 +138,14 @@ function Developers() {
                     </span>
                   ))}
                 </div>
+
+                <Link
+                  to={`/developers/${profile.user._id}`}
+                  className="inline-block px-4 py-2 bg-cyan-500 text-black rounded-lg font-semibold"
+                >
+                  View Profile
+                </Link>
+
               </div>
             ))}
 

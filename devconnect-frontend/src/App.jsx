@@ -7,6 +7,7 @@ import Profile from "./pages/Profile";
 import CreateProfile from "./pages/CreateProfile";
 import AddExperience from "./pages/AddExperience";
 import Developers from "./pages/Developers";
+import PublicProfile from "./pages/PublicProfile";
 
 function App() {
   const token = localStorage.getItem("token");
@@ -63,6 +64,14 @@ function App() {
         path="/developers"
         element={
           token ? <Developers /> : <Navigate to="/login" />
+        }
+      />
+
+      {/* PUBLIC PROFILE */}
+      <Route
+        path="/developers/:userId"
+        element={
+          token ? <PublicProfile /> : <Navigate to="/login" />
         }
       />
 
