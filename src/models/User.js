@@ -60,6 +60,24 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+
+    // =========================
+    // CONNECTION SYSTEM
+    // =========================
+
+    connections: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    connectionRequests: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true }
 );
