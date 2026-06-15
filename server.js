@@ -8,21 +8,21 @@ import postRoutes from "./src/routes/Post.js";
 import profileRoutes from "./src/routes/profileRoutes.js";
 import projectRoutes from "./src/routes/projectRoutes.js";
 import connectionRoutes from "./src/routes/connectionRoutes.js";
+import messageRoutes from "./src/routes/messageRoutes.js";
 
 dotenv.config();
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/connections", connectionRoutes);
+app.use("/api/messages", messageRoutes);
 
 // Test Route
 app.get("/", (req, res) => {
