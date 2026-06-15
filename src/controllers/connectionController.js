@@ -36,10 +36,9 @@ export const sendConnectionRequest = async (req, res) => {
       });
     }
 
-    const requestAlreadySent =
-      receiver.connectionRequests.some(
-        (id) => id.toString() === senderId.toString()
-      );
+    const requestAlreadySent = receiver.connectionRequests.some(
+      (id) => id.toString() === senderId.toString()
+    );
 
     if (requestAlreadySent) {
       return res.status(400).json({
@@ -82,10 +81,9 @@ export const acceptConnectionRequest = async (req, res) => {
       });
     }
 
-    const requestExists =
-      currentUser.connectionRequests.some(
-        (id) => id.toString() === requesterId
-      );
+    const requestExists = currentUser.connectionRequests.some(
+      (id) => id.toString() === requesterId
+    );
 
     if (!requestExists) {
       return res.status(400).json({
@@ -149,10 +147,9 @@ export const rejectConnectionRequest = async (req, res) => {
 
     const currentUser = await User.findById(req.user._id);
 
-    const requestExists =
-      currentUser.connectionRequests.some(
-        (id) => id.toString() === requesterId
-      );
+    const requestExists = currentUser.connectionRequests.some(
+      (id) => id.toString() === requesterId
+    );
 
     if (!requestExists) {
       return res.status(400).json({
@@ -171,6 +168,52 @@ export const rejectConnectionRequest = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Connection request rejected",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * CANCEL SENT CONNECTION REQUEST
+ */
+export const cancelConnectionRequest = async (req, res) => {
+  try {
+    const receiverId = req.params.userId;
+
+    const receiver = await User.findById(receiverId);
+
+    if (!receiver) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const requestExists = receiver.connectionRequests.some(
+      (id) => id.toString() === req.user._id.toString()
+    );
+
+    if (!requestExists) {
+      return res.status(400).json({
+        success: false,
+        message: "No sent request found",
+      });
+    }
+
+    receiver.connectionRequests =
+      receiver.connectionRequests.filter(
+        (id) => id.toString() !== req.user._id.toString()
+      );
+
+    await receiver.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Connection request cancelled successfully",
     });
   } catch (error) {
     return res.status(500).json({
