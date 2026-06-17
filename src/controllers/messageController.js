@@ -164,10 +164,31 @@ export const getConversations = async (req, res) => {
       .populate("participants", "name email profilePicture")
       .sort({ lastMessageAt: -1 });
 
+    const conversationsWithUnreadCount =
+      await Promise.all(
+        conversations.map(async (conversation) => {
+          const otherUser = conversation.participants.find(
+            (participant) =>
+              participant._id.toString() !== userId.toString()
+          );
+
+          const unreadCount = await Message.countDocuments({
+            sender: otherUser?._id,
+            receiver: userId,
+            isRead: false,
+          });
+
+          return {
+            ...conversation.toObject(),
+            unreadCount,
+          };
+        })
+      );
+
     res.status(200).json({
       success: true,
-      count: conversations.length,
-      data: conversations,
+      count: conversationsWithUnreadCount.length,
+      data: conversationsWithUnreadCount,
     });
   } catch (error) {
     console.log("GET CONVERSATIONS ERROR:", error);
