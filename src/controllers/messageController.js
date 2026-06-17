@@ -86,6 +86,74 @@ export const getMessages = async (req, res) => {
   }
 };
 
+export const markMessagesAsRead = async (req, res) => {
+  try {
+    const myId = req.user._id;
+    const otherUserId = req.params.userId;
+
+    const result = await Message.updateMany(
+      {
+        sender: otherUserId,
+        receiver: myId,
+        isRead: false,
+      },
+      {
+        $set: {
+          isRead: true,
+        },
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Messages marked as read",
+      modifiedCount: result.modifiedCount,
+    });
+  } catch (error) {
+    console.log("MARK READ ERROR:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
+export const getUnreadCount = async (req, res) => {
+  try {
+    const myId = req.user._id;
+
+    const unreadMessages = await Message.aggregate([
+      {
+        $match: {
+          receiver: myId,
+          isRead: false,
+        },
+      },
+      {
+        $group: {
+          _id: "$sender",
+          count: {
+            $sum: 1,
+          },
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: unreadMessages,
+    });
+  } catch (error) {
+    console.log("UNREAD COUNT ERROR:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
 export const getConversations = async (req, res) => {
   try {
     const userId = req.user._id;
