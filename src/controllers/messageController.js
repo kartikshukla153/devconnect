@@ -1,5 +1,9 @@
 import Message from "../models/Message.js";
 import Conversation from "../models/Conversation.js";
+import {
+  getIO,
+  getReceiverSocketId,
+} from "../socket/socket.js";
 
 export const sendMessage = async (req, res) => {
   try {
@@ -37,6 +41,20 @@ export const sendMessage = async (req, res) => {
     conversation.lastMessageAt = new Date();
 
     await conversation.save();
+
+    const receiverSocketId =
+      getReceiverSocketId(receiverId.toString());
+
+    if (receiverSocketId) {
+      getIO().to(receiverSocketId).emit(
+        "newMessage",
+        message
+      );
+
+      console.log(
+        `Real-time message sent to socket: ${receiverSocketId}`
+      );
+    }
 
     res.status(201).json({
       success: true,
