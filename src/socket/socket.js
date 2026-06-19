@@ -23,6 +23,28 @@ export const initializeSocket = (server) => {
       );
     });
 
+    socket.on("typing", ({ senderId, receiverId }) => {
+      const receiverSocketId =
+        onlineUsers.get(receiverId);
+
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("userTyping", {
+          senderId,
+        });
+      }
+    });
+
+    socket.on("stopTyping", ({ senderId, receiverId }) => {
+      const receiverSocketId =
+        onlineUsers.get(receiverId);
+
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("userStoppedTyping", {
+          senderId,
+        });
+      }
+    });
+
     socket.on("disconnect", () => {
       for (const [userId, socketId] of onlineUsers.entries()) {
         if (socketId === socket.id) {
