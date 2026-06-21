@@ -1,4 +1,5 @@
 import Post from "../models/Post.js";
+import createNotification from "../utils/createNotification.js";
 
 /**
  * CREATE POST
@@ -83,6 +84,20 @@ export const likePost = async (req, res) => {
 
     await post.save();
 
+    // =========================
+    // CREATE NOTIFICATION
+    // =========================
+
+    if (post.user.toString() !== req.user._id.toString()) {
+      await createNotification({
+        recipient: post.user,
+        sender: req.user._id,
+        type: "post_like",
+        message: "liked your post",
+        relatedPost: post._id,
+      });
+    }
+
     return res.status(200).json({
       success: true,
       message: "Post liked successfully",
@@ -158,6 +173,20 @@ export const addComment = async (req, res) => {
     });
 
     await post.save();
+
+    // =========================
+    // CREATE NOTIFICATION
+    // =========================
+
+    if (post.user.toString() !== req.user._id.toString()) {
+      await createNotification({
+        recipient: post.user,
+        sender: req.user._id,
+        type: "post_comment",
+        message: "commented on your post",
+        relatedPost: post._id,
+      });
+    }
 
     return res.status(200).json({
       success: true,

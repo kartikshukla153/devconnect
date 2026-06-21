@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import createNotification from "../utils/createNotification.js";
 
 /**
  * SEND CONNECTION REQUEST
@@ -51,6 +52,13 @@ export const sendConnectionRequest = async (req, res) => {
 
     await receiver.save();
 
+    await createNotification({
+      recipient: receiverId,
+      sender: senderId,
+      type: "connection_request",
+      message: `${sender.name} sent you a connection request`,
+    });
+
     return res.status(200).json({
       success: true,
       message: "Connection request sent",
@@ -102,6 +110,13 @@ export const acceptConnectionRequest = async (req, res) => {
 
     await currentUser.save();
     await requester.save();
+
+    await createNotification({
+      recipient: requesterId,
+      sender: currentUserId,
+      type: "connection_accepted",
+      message: `${currentUser.name} accepted your connection request`,
+    });
 
     return res.status(200).json({
       success: true,
