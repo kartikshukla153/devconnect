@@ -1,4 +1,5 @@
 import Project from "../models/Project.js";
+import Notification from "../models/Notification.js";
 
 /**
  * CREATE PROJECT
@@ -105,10 +106,21 @@ export const requestToJoinProject = async (
       });
     }
 
+    const userId = req.user.id;
+
+    if (
+      project.creator.toString() === userId
+    ) {
+      return res.status(400).json({
+        message:
+          "Project owner cannot send join request",
+      });
+    }
+
     const alreadyMember =
       project.members.some(
         (member) =>
-          member.user.toString() === req.user.id
+          member.user.toString() === userId
       );
 
     if (alreadyMember) {
@@ -119,8 +131,9 @@ export const requestToJoinProject = async (
     }
 
     const alreadyRequested =
-      project.joinRequests.includes(
-        req.user.id
+      project.joinRequests.some(
+        (requestId) =>
+          requestId.toString() === userId
       );
 
     if (alreadyRequested) {
@@ -130,9 +143,18 @@ export const requestToJoinProject = async (
       });
     }
 
-    project.joinRequests.push(req.user.id);
+    project.joinRequests.push(userId);
 
     await project.save();
+
+    await Notification.create({
+      recipient: project.creator,
+      sender: userId,
+      type: "project_join_request",
+      message:
+        "A developer requested to join your project",
+      relatedProject: project._id,
+    });
 
     res.status(200).json({
       success: true,

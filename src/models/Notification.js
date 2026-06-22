@@ -23,6 +23,7 @@ const notificationSchema = new mongoose.Schema(
         "post_comment",
         "message",
         "project_invite",
+        "project_join_request",
       ],
       required: true,
     },
