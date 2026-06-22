@@ -170,6 +170,127 @@ export const requestToJoinProject = async (
 };
 
 /**
+ * APPROVE JOIN REQUEST
+ */
+export const approveJoinRequest = async (
+  req,
+  res
+) => {
+  try {
+    const { projectId, userId } = req.params;
+
+    const project = await Project.findById(
+      projectId
+    );
+
+    if (!project) {
+      return res.status(404).json({
+        message: "Project not found",
+      });
+    }
+
+    if (
+      project.creator.toString() !== req.user.id
+    ) {
+      return res.status(403).json({
+        message:
+          "Only project owner can approve requests",
+      });
+    }
+
+    const requestExists =
+      project.joinRequests.some(
+        (id) => id.toString() === userId
+      );
+
+    if (!requestExists) {
+      return res.status(404).json({
+        message: "Join request not found",
+      });
+    }
+
+    project.joinRequests =
+      project.joinRequests.filter(
+        (id) => id.toString() !== userId
+      );
+
+    project.members.push({
+      user: userId,
+      role: "member",
+    });
+
+    await project.save();
+
+    await Notification.create({
+      recipient: userId,
+      sender: req.user.id,
+      type: "project_invite",
+      message:
+        "Your join request has been approved",
+      relatedProject: project._id,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Join request approved successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * REJECT JOIN REQUEST
+ */
+export const rejectJoinRequest = async (
+  req,
+  res
+) => {
+  try {
+    const { projectId, userId } = req.params;
+
+    const project = await Project.findById(
+      projectId
+    );
+
+    if (!project) {
+      return res.status(404).json({
+        message: "Project not found",
+      });
+    }
+
+    if (
+      project.creator.toString() !== req.user.id
+    ) {
+      return res.status(403).json({
+        message:
+          "Only project owner can reject requests",
+      });
+    }
+
+    project.joinRequests =
+      project.joinRequests.filter(
+        (id) => id.toString() !== userId
+      );
+
+    await project.save();
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Join request rejected successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+/**
  * DELETE PROJECT
  */
 export const deleteProject = async (req, res) => {

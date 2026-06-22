@@ -6,6 +6,8 @@ import {
   getSingleProject,
   deleteProject,
   requestToJoinProject,
+  approveJoinRequest,
+  rejectJoinRequest,
 } from "../controllers/projectController.js";
 
 import authMiddleware from "../middleware/authMiddleware.js";
@@ -34,6 +36,24 @@ router.put(
   "/join-request/:id",
   authMiddleware,
   requestToJoinProject
+);
+
+/**
+ * APPROVE JOIN REQUEST
+ */
+router.put(
+  "/approve-request/:projectId/:userId",
+  authMiddleware,
+  approveJoinRequest
+);
+
+/**
+ * REJECT JOIN REQUEST
+ */
+router.put(
+  "/reject-request/:projectId/:userId",
+  authMiddleware,
+  rejectJoinRequest
 );
 
 /**
