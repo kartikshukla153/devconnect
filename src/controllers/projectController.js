@@ -17,6 +17,7 @@ export const createProject = async (req, res) => {
 
     const newProject = new Project({
       creator: req.user.id,
+
       title,
       description,
       techStack,
@@ -24,7 +25,13 @@ export const createProject = async (req, res) => {
       status,
       githubRepo,
       liveLink,
-      members: [req.user.id],
+
+      members: [
+        {
+          user: req.user.id,
+          role: "owner",
+        },
+      ],
     });
 
     const savedProject = await newProject.save();
@@ -63,7 +70,7 @@ export const getSingleProject = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id)
       .populate("creator", "name email")
-      .populate("members", "name email");
+      .populate("members.user", "name email");
 
     if (!project) {
       return res.status(404).json({
@@ -72,6 +79,66 @@ export const getSingleProject = async (req, res) => {
     }
 
     res.status(200).json(project);
+  } catch (error) {
+    res.status(500).json({
+      message: "Server Error",
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * REQUEST TO JOIN PROJECT
+ */
+export const requestToJoinProject = async (
+  req,
+  res
+) => {
+  try {
+    const project = await Project.findById(
+      req.params.id
+    );
+
+    if (!project) {
+      return res.status(404).json({
+        message: "Project not found",
+      });
+    }
+
+    const alreadyMember =
+      project.members.some(
+        (member) =>
+          member.user.toString() === req.user.id
+      );
+
+    if (alreadyMember) {
+      return res.status(400).json({
+        message:
+          "You are already a member of this project",
+      });
+    }
+
+    const alreadyRequested =
+      project.joinRequests.includes(
+        req.user.id
+      );
+
+    if (alreadyRequested) {
+      return res.status(400).json({
+        message:
+          "Join request already sent",
+      });
+    }
+
+    project.joinRequests.push(req.user.id);
+
+    await project.save();
+
+    res.status(200).json({
+      success: true,
+      message:
+        "Join request sent successfully",
+    });
   } catch (error) {
     res.status(500).json({
       message: "Server Error",
@@ -93,7 +160,6 @@ export const deleteProject = async (req, res) => {
       });
     }
 
-    // Only creator can delete
     if (project.creator.toString() !== req.user.id) {
       return res.status(403).json({
         message: "Not authorized",

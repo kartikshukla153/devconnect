@@ -1,9 +1,11 @@
 import express from "express";
+
 import {
   createProject,
   getAllProjects,
   getSingleProject,
   deleteProject,
+  requestToJoinProject,
 } from "../controllers/projectController.js";
 
 import authMiddleware from "../middleware/authMiddleware.js";
@@ -24,6 +26,15 @@ router.get("/", getAllProjects);
  * GET SINGLE PROJECT
  */
 router.get("/:id", getSingleProject);
+
+/**
+ * REQUEST TO JOIN PROJECT
+ */
+router.put(
+  "/join-request/:id",
+  authMiddleware,
+  requestToJoinProject
+);
 
 /**
  * DELETE PROJECT

@@ -47,6 +47,33 @@ const projectSchema = new mongoose.Schema(
 
     members: [
       {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+
+        role: {
+          type: String,
+          enum: ["owner", "admin", "member"],
+          default: "member",
+        },
+
+        joinedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+
+    pendingInvites: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    joinRequests: [
+      {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
@@ -57,6 +84,9 @@ const projectSchema = new mongoose.Schema(
   }
 );
 
-const Project = mongoose.model("Project", projectSchema);
+const Project = mongoose.model(
+  "Project",
+  projectSchema
+);
 
 export default Project;
