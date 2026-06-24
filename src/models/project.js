@@ -67,8 +67,15 @@ const projectSchema = new mongoose.Schema(
 
     pendingInvites: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+
+        invitedAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
 

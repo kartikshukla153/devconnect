@@ -170,6 +170,87 @@ export const requestToJoinProject = async (
 };
 
 /**
+ * INVITE DEVELOPER TO PROJECT
+ */
+export const inviteDeveloperToProject =
+  async (req, res) => {
+    try {
+      const { projectId, userId } =
+        req.params;
+
+      const project =
+        await Project.findById(projectId);
+
+      if (!project) {
+        return res.status(404).json({
+          message: "Project not found",
+        });
+      }
+
+      if (
+        project.creator.toString() !==
+        req.user.id
+      ) {
+        return res.status(403).json({
+          message:
+            "Only project owner can send invites",
+        });
+      }
+
+      const alreadyMember =
+        project.members.some(
+          (member) =>
+            member.user.toString() === userId
+        );
+
+      if (alreadyMember) {
+        return res.status(400).json({
+          message:
+            "User is already a project member",
+        });
+      }
+
+      const alreadyInvited =
+        project.pendingInvites.some(
+          (invite) =>
+            invite.user.toString() === userId
+        );
+
+      if (alreadyInvited) {
+        return res.status(400).json({
+          message:
+            "Invite already sent",
+        });
+      }
+
+      project.pendingInvites.push({
+        user: userId,
+      });
+
+      await project.save();
+
+      await Notification.create({
+        recipient: userId,
+        sender: req.user.id,
+        type: "project_invite",
+        message:
+          "You have been invited to join a project",
+        relatedProject: project._id,
+      });
+
+      return res.status(200).json({
+        success: true,
+        message:
+          "Project invite sent successfully",
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
+  };
+
+/**
  * APPROVE JOIN REQUEST
  */
 export const approveJoinRequest = async (

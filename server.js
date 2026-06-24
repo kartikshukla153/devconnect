@@ -12,7 +12,7 @@ import connectionRoutes from "./src/routes/connectionRoutes.js";
 import messageRoutes from "./src/routes/messageRoutes.js";
 import searchRoutes from "./src/routes/searchRoutes.js";
 import notificationRoutes from "./src/routes/notificationRoutes.js";
-
+  
 import { initializeSocket } from "./src/socket/socket.js";
 
 dotenv.config();
