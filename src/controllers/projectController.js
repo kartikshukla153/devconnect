@@ -249,7 +249,140 @@ export const inviteDeveloperToProject =
       });
     }
   };
+/**
+ * ACCEPT PROJECT INVITE
+ */
+export const acceptProjectInvite = async (
+  req,
+  res
+) => {
+  try {
+    const { projectId } = req.params;
 
+    const project = await Project.findById(
+      projectId
+    );
+
+    if (!project) {
+      return res.status(404).json({
+        message: "Project not found",
+      });
+    }
+
+    const userId = req.user.id;
+
+    const inviteExists =
+      project.pendingInvites.some(
+        (invite) =>
+          invite.user.toString() === userId
+      );
+
+    if (!inviteExists) {
+      return res.status(404).json({
+        message: "Invite not found",
+      });
+    }
+
+    const alreadyMember =
+      project.members.some(
+        (member) =>
+          member.user.toString() === userId
+      );
+
+    if (alreadyMember) {
+      return res.status(400).json({
+        message:
+          "You are already a member of this project",
+      });
+    }
+
+    project.pendingInvites =
+      project.pendingInvites.filter(
+        (invite) =>
+          invite.user.toString() !== userId
+      );
+
+    project.members.push({
+      user: userId,
+      role: "member",
+    });
+
+    await project.save();
+
+    await Notification.create({
+      recipient: project.creator,
+      sender: userId,
+      type: "project_invite",
+      message:
+        "A developer accepted your project invite",
+      relatedProject: project._id,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Project invite accepted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * REJECT PROJECT INVITE
+ */
+export const rejectProjectInvite = async (
+  req,
+  res
+) => {
+  try {
+    const { projectId } = req.params;
+
+    const project = await Project.findById(
+      projectId
+    );
+
+    if (!project) {
+      return res.status(404).json({
+        message: "Project not found",
+      });
+    }
+
+    const userId = req.user.id;
+
+    const inviteExists =
+      project.pendingInvites.some(
+        (invite) =>
+          invite.user.toString() === userId
+      );
+
+    if (!inviteExists) {
+      return res.status(404).json({
+        message: "Invite not found",
+      });
+    }
+
+    project.pendingInvites =
+      project.pendingInvites.filter(
+        (invite) =>
+          invite.user.toString() !== userId
+      );
+
+    await project.save();
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Project invite rejected successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 /**
  * APPROVE JOIN REQUEST
  */

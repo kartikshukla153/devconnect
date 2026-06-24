@@ -9,6 +9,8 @@ import {
   approveJoinRequest,
   rejectJoinRequest,
   inviteDeveloperToProject,
+  acceptProjectInvite,
+  rejectProjectInvite,
 } from "../controllers/projectController.js";
 
 import authMiddleware from "../middleware/authMiddleware.js";
@@ -46,6 +48,24 @@ router.put(
   "/invite/:projectId/:userId",
   authMiddleware,
   inviteDeveloperToProject
+);
+
+/**
+ * ACCEPT PROJECT INVITE
+ */
+router.put(
+  "/accept-invite/:projectId",
+  authMiddleware,
+  acceptProjectInvite
+);
+
+/**
+ * REJECT PROJECT INVITE
+ */
+router.put(
+  "/reject-invite/:projectId",
+  authMiddleware,
+  rejectProjectInvite
 );
 
 /**
