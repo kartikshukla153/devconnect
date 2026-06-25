@@ -7,6 +7,7 @@ import {
   getProjectTasks,
   assignTask,
   updateTaskStatus,
+  deleteTask,
 } from "../controllers/task.controller.js";
 
 const router = express.Router();
@@ -45,6 +46,12 @@ router.put(
   "/status/:taskId",
   authMiddleware,
   updateTaskStatus
+);
+
+router.delete(
+  "/:taskId",
+  authMiddleware,
+  deleteTask
 );
 
 export default router;
