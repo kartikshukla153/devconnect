@@ -325,3 +325,56 @@ export const deleteTask = async (
 
 } 
 };
+/**
+ * GET SINGLE TASK
+ */
+export const getSingleTask = async (
+  req,
+  res
+) => {
+  try {
+    const { taskId } = req.params;
+
+    const task = await Task.findById(taskId)
+      .populate(
+        "assignedTo",
+        "name email"
+      )
+      .populate(
+        "createdBy",
+        "name email"
+      );
+
+    if (!task) {
+      return res.status(404).json({
+        message: "Task not found",
+      });
+    }
+
+    const project = await Project.findById(
+      task.project
+    );
+
+    const member = project.members.find(
+      (member) =>
+        member.user.toString() ===
+        req.user._id.toString()
+    );
+
+    if (!member) {
+      return res.status(403).json({
+        message:
+          "Only project members can view this task",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      task,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};

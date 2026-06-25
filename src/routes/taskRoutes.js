@@ -8,6 +8,7 @@ import {
   assignTask,
   updateTaskStatus,
   deleteTask,
+  getSingleTask,
 } from "../controllers/task.controller.js";
 
 const router = express.Router();
@@ -31,6 +32,15 @@ router.get(
 );
 
 /**
+ * GET SINGLE TASK
+ */
+router.get(
+  "/:taskId",
+  authMiddleware,
+  getSingleTask
+);
+
+/**
  * ASSIGN TASK
  */
 router.put(
@@ -48,6 +58,9 @@ router.put(
   updateTaskStatus
 );
 
+/**
+ * DELETE TASK
+ */
 router.delete(
   "/:taskId",
   authMiddleware,
