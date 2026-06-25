@@ -12,6 +12,7 @@ import connectionRoutes from "./src/routes/connectionRoutes.js";
 import messageRoutes from "./src/routes/messageRoutes.js";
 import searchRoutes from "./src/routes/searchRoutes.js";
 import notificationRoutes from "./src/routes/notificationRoutes.js";
+import taskRoutes from "./src/routes/taskRoutes.js";
   
 import { initializeSocket } from "./src/socket/socket.js";
 
@@ -26,6 +27,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/projects", projectRoutes);
+app.use("/api/tasks", taskRoutes);
 app.use("/api/connections", connectionRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/search", searchRoutes);

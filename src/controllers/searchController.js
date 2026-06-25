@@ -1,10 +1,7 @@
 import User from "../models/User.js";
 import Post from "../models/Post.js";
-import Project from "../models/Project.js";
+import Project from "../models/project.js";
 
-// ======================================
-// SEARCH USERS
-// ======================================
 
 export const searchUsers = async (req, res) => {
   try {

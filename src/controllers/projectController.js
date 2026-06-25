@@ -1,9 +1,6 @@
-import Project from "../models/Project.js";
+import Project from "../models/project.js";
 import Notification from "../models/Notification.js";
 
-/**
- * CREATE PROJECT
- */
 export const createProject = async (req, res) => {
   try {
     const {
