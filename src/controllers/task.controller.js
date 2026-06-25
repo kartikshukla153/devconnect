@@ -15,9 +15,7 @@ export const createTask = async (req, res) => {
       deadline,
     } = req.body;
 
-    const project = await Project.findById(
-      projectId
-    );
+    const project = await Project.findById(projectId);
 
     if (!project) {
       return res.status(404).json({
@@ -69,14 +67,8 @@ export const createTask = async (req, res) => {
 
     const populatedTask =
       await Task.findById(task._id)
-        .populate(
-          "assignedTo",
-          "name email"
-        )
-        .populate(
-          "createdBy",
-          "name email"
-        );
+        .populate("assignedTo", "name email")
+        .populate("createdBy", "name email");
 
     return res.status(201).json({
       success: true,
@@ -99,9 +91,7 @@ export const getProjectTasks = async (
   try {
     const { projectId } = req.params;
 
-    const project = await Project.findById(
-      projectId
-    );
+    const project = await Project.findById(projectId);
 
     if (!project) {
       return res.status(404).json({
@@ -112,14 +102,8 @@ export const getProjectTasks = async (
     const tasks = await Task.find({
       project: projectId,
     })
-      .populate(
-        "assignedTo",
-        "name email"
-      )
-      .populate(
-        "createdBy",
-        "name email"
-      )
+      .populate("assignedTo", "name email")
+      .populate("createdBy", "name email")
       .sort({
         createdAt: -1,
       });
@@ -128,6 +112,161 @@ export const getProjectTasks = async (
       success: true,
       count: tasks.length,
       tasks,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * ASSIGN TASK
+ */
+export const assignTask = async (
+  req,
+  res
+) => {
+  try {
+    const { taskId } = req.params;
+    const { assignedTo } = req.body;
+
+    const task = await Task.findById(taskId);
+
+    if (!task) {
+      return res.status(404).json({
+        message: "Task not found",
+      });
+    }
+
+    const project = await Project.findById(
+      task.project
+    );
+
+    const currentMember =
+      project.members.find(
+        (member) =>
+          member.user.toString() ===
+          req.user._id.toString()
+      );
+
+    if (
+      !currentMember ||
+      !["owner", "admin"].includes(
+        currentMember.role
+      )
+    ) {
+      return res.status(403).json({
+        message:
+          "Only owner or admin can assign tasks",
+      });
+    }
+
+    const assignedMember =
+      project.members.find(
+        (member) =>
+          member.user.toString() ===
+          assignedTo
+      );
+
+    if (!assignedMember) {
+      return res.status(400).json({
+        message:
+          "Assigned user must be a project member",
+      });
+    }
+
+    task.assignedTo = assignedTo;
+
+    await task.save();
+
+    const updatedTask =
+      await Task.findById(task._id)
+        .populate("assignedTo", "name email")
+        .populate("createdBy", "name email");
+
+    return res.status(200).json({
+      success: true,
+      message: "Task assigned successfully",
+      task: updatedTask,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+/**
+ * UPDATE TASK STATUS
+ */
+export const updateTaskStatus = async (
+  req,
+  res
+) => {
+  try {
+    const { taskId } = req.params;
+    const { status } = req.body;
+
+    const allowedStatuses = [
+      "todo",
+      "in-progress",
+      "review",
+      "completed",
+    ];
+
+    if (
+      !allowedStatuses.includes(status)
+    ) {
+      return res.status(400).json({
+        message: "Invalid status",
+      });
+    }
+
+    const task = await Task.findById(taskId);
+
+    if (!task) {
+      return res.status(404).json({
+        message: "Task not found",
+      });
+    }
+
+    const project = await Project.findById(
+      task.project
+    );
+
+    const member = project.members.find(
+      (member) =>
+        member.user.toString() ===
+        req.user._id.toString()
+    );
+
+    if (!member) {
+      return res.status(403).json({
+        message:
+          "Only project members can update tasks",
+      });
+    }
+
+    task.status = status;
+
+    await task.save();
+
+    const updatedTask =
+      await Task.findById(task._id)
+        .populate(
+          "assignedTo",
+          "name email"
+        )
+        .populate(
+          "createdBy",
+          "name email"
+        );
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Task status updated successfully",
+      task: updatedTask,
     });
   } catch (error) {
     return res.status(500).json({

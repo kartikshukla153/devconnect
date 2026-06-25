@@ -5,6 +5,8 @@ import authMiddleware from "../middleware/authMiddleware.js";
 import {
   createTask,
   getProjectTasks,
+  assignTask,
+  updateTaskStatus,
 } from "../controllers/task.controller.js";
 
 const router = express.Router();
@@ -25,6 +27,24 @@ router.get(
   "/project/:projectId",
   authMiddleware,
   getProjectTasks
+);
+
+/**
+ * ASSIGN TASK
+ */
+router.put(
+  "/assign/:taskId",
+  authMiddleware,
+  assignTask
+);
+
+/**
+ * UPDATE TASK STATUS
+ */
+router.put(
+  "/status/:taskId",
+  authMiddleware,
+  updateTaskStatus
 );
 
 export default router;
