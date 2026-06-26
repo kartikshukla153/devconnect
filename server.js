@@ -13,6 +13,7 @@ import messageRoutes from "./src/routes/messageRoutes.js";
 import searchRoutes from "./src/routes/searchRoutes.js";
 import notificationRoutes from "./src/routes/notificationRoutes.js";
 import taskRoutes from "./src/routes/taskRoutes.js";
+import projectChatRoutes from "./src/routes/projectChatRoutes.js";
   
 import { initializeSocket } from "./src/socket/socket.js";
 
@@ -32,6 +33,7 @@ app.use("/api/connections", connectionRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/project-chat", projectChatRoutes);
 
 app.get("/", (req, res) => {
   res.send("DevConnect API running...");
