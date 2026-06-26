@@ -11,6 +11,7 @@ import {
   inviteDeveloperToProject,
   acceptProjectInvite,
   rejectProjectInvite,
+  getProjectDashboard,
 } from "../controllers/projectController.js";
 
 import authMiddleware from "../middleware/authMiddleware.js";
@@ -26,6 +27,15 @@ router.post("/", authMiddleware, createProject);
  * GET ALL PROJECTS
  */
 router.get("/", getAllProjects);
+
+/**
+ * PROJECT DASHBOARD
+ */
+router.get(
+  "/dashboard/:projectId",
+  authMiddleware,
+  getProjectDashboard
+);
 
 /**
  * GET SINGLE PROJECT
@@ -89,6 +99,10 @@ router.put(
 /**
  * DELETE PROJECT
  */
-router.delete("/:id", authMiddleware, deleteProject);
+router.delete(
+  "/:id",
+  authMiddleware,
+  deleteProject
+);
 
 export default router;

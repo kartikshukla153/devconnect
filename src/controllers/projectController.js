@@ -1,6 +1,6 @@
 import Project from "../models/project.js";
 import Notification from "../models/Notification.js";
-
+import Task from "../models/Task.js";
 export const createProject = async (req, res) => {
   try {
     const {
@@ -532,3 +532,81 @@ export const deleteProject = async (req, res) => {
     });
   }
 };
+/**
+ * PROJECT DASHBOARD ANALYTICS
+ */
+export const getProjectDashboard =
+  async (req, res) => {
+    try {
+      const { projectId } = req.params;
+
+      const project =
+        await Project.findById(projectId);
+
+      if (!project) {
+        return res.status(404).json({
+          message: "Project not found",
+        });
+      }
+
+      const tasks = await Task.find({
+        project: projectId,
+      });
+
+      const totalTasks = tasks.length;
+
+      const todoTasks = tasks.filter(
+        (task) => task.status === "todo"
+      ).length;
+
+      const inProgressTasks =
+        tasks.filter(
+          (task) =>
+            task.status === "in-progress"
+        ).length;
+
+      const reviewTasks = tasks.filter(
+        (task) => task.status === "review"
+      ).length;
+
+      const completedTasks =
+        tasks.filter(
+          (task) =>
+            task.status === "completed"
+        ).length;
+
+      const completionRate =
+        totalTasks === 0
+          ? 0
+          : Math.round(
+              (completedTasks /
+                totalTasks) *
+                100
+            );
+
+      return res.status(200).json({
+        success: true,
+
+        projectTitle: project.title,
+
+        totalMembers:
+          project.members.length,
+
+        totalTasks,
+
+        todoTasks,
+
+        inProgressTasks,
+
+        reviewTasks,
+
+        completedTasks,
+
+        completionRate,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
+  };
