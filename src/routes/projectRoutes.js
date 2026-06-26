@@ -12,8 +12,8 @@ import {
   acceptProjectInvite,
   rejectProjectInvite,
   getProjectDashboard,
+  getProjectActivity,
 } from "../controllers/projectController.js";
-
 import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -36,7 +36,11 @@ router.get(
   authMiddleware,
   getProjectDashboard
 );
-
+router.get(
+  "/activity/:projectId",
+  authMiddleware,
+  getProjectActivity
+);
 /**
  * GET SINGLE PROJECT
  */

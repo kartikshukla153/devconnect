@@ -1,6 +1,7 @@
 import Project from "../models/project.js";
 import Notification from "../models/Notification.js";
 import Task from "../models/Task.js";
+import Activity from "../models/Activity.js";
 export const createProject = async (req, res) => {
   try {
     const {
@@ -32,9 +33,16 @@ export const createProject = async (req, res) => {
       ],
     });
 
-    const savedProject = await newProject.save();
+   const savedProject = await newProject.save();
 
-    res.status(201).json(savedProject);
+await Activity.create({
+  project: savedProject._id,
+  user: req.user.id,
+  type: "project_created",
+  message: `${req.user.name} created the project "${savedProject.title}"`,
+});
+
+res.status(201).json(savedProject);
   } catch (error) {
     res.status(500).json({
       message: "Server Error",
@@ -610,3 +618,37 @@ export const getProjectDashboard =
       });
     }
   };
+  /**
+ * GET PROJECT ACTIVITY
+ */
+export const getProjectActivity = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      return res.status(404).json({
+        message: "Project not found",
+      });
+    }
+
+    const activities = await Activity.find({
+      project: projectId,
+    })
+      .populate("user", "name email")
+      .sort({
+        createdAt: -1,
+      });
+
+    return res.status(200).json({
+      success: true,
+      count: activities.length,
+      activities,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};

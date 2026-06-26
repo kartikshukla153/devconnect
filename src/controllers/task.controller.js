@@ -1,6 +1,6 @@
 import Task from "../models/Task.js";
 import Project from "../models/project.js";
-
+import Activity from "../models/Activity.js";
 /**
  * CREATE TASK
  */
@@ -14,7 +14,12 @@ export const createTask = async (req, res) => {
       priority,
       deadline,
     } = req.body;
-
+await Activity.create({
+  project: projectId,
+  user: req.user._id,
+  type: "task_created",
+  message: `${req.user.name} created task "${title}"`,
+});
     const project = await Project.findById(projectId);
 
     if (!project) {
@@ -179,6 +184,12 @@ export const assignTask = async (
     task.assignedTo = assignedTo;
 
     await task.save();
+    await Activity.create({
+  project: task.project,
+  user: req.user._id,
+  type: "task_assigned",
+  message: `${req.user.name} assigned task`,
+});
 
     const updatedTask =
       await Task.findById(task._id)
@@ -250,6 +261,12 @@ export const updateTaskStatus = async (
     task.status = status;
 
     await task.save();
+    await Activity.create({
+  project: task.project,
+  user: req.user._id,
+  type: "task_status_updated",
+  message: `${req.user.name} changed task "${task.title}" status to ${status}`,
+});
 
     const updatedTask =
       await Task.findById(task._id)
