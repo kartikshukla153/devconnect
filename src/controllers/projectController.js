@@ -191,17 +191,6 @@ export const inviteDeveloperToProject =
           message: "Project not found",
         });
       }
-
-      if (
-        project.creator.toString() !==
-        req.user.id
-      ) {
-        return res.status(403).json({
-          message:
-            "Only project owner can send invites",
-        });
-      }
-
       const alreadyMember =
         project.members.some(
           (member) =>
@@ -407,16 +396,6 @@ export const approveJoinRequest = async (
         message: "Project not found",
       });
     }
-
-    if (
-      project.creator.toString() !== req.user.id
-    ) {
-      return res.status(403).json({
-        message:
-          "Only project owner can approve requests",
-      });
-    }
-
     const requestExists =
       project.joinRequests.some(
         (id) => id.toString() === userId
@@ -481,15 +460,6 @@ export const rejectJoinRequest = async (
       });
     }
 
-    if (
-      project.creator.toString() !== req.user.id
-    ) {
-      return res.status(403).json({
-        message:
-          "Only project owner can reject requests",
-      });
-    }
-
     project.joinRequests =
       project.joinRequests.filter(
         (id) => id.toString() !== userId
@@ -522,11 +492,7 @@ export const deleteProject = async (req, res) => {
       });
     }
 
-    if (project.creator.toString() !== req.user.id) {
-      return res.status(403).json({
-        message: "Not authorized",
-      });
-    }
+  
 
     await project.deleteOne();
 
