@@ -2,72 +2,83 @@ import { Server } from "socket.io";
 
 let io;
 
-const onlineUsers = new Map();
+// Maps:
+// userId -> socketId
+const userSocketMap = {};
 
 export const initializeSocket = (server) => {
   io = new Server(server, {
     cors: {
       origin: "*",
-      methods: ["GET", "POST"],
     },
   });
 
   io.on("connection", (socket) => {
-    console.log(`User Connected: ${socket.id}`);
+    console.log("User Connected:", socket.id);
 
-    socket.on("registerUser", (userId) => {
-      onlineUsers.set(userId, socket.id);
+    // ==========================
+    // USER SOCKET MAPPING
+    // ==========================
+    const userId = socket.handshake.query.userId;
+
+    if (userId) {
+      userSocketMap[userId] = socket.id;
 
       console.log(
-        `User Registered: ${userId} -> ${socket.id}`
+        `User ${userId} mapped to socket ${socket.id}`
+      );
+    }
+
+    // ==========================
+    // PROJECT ROOMS
+    // ==========================
+    socket.on("join_project", (projectId) => {
+      socket.join(projectId);
+
+      console.log(
+        `${socket.id} joined project ${projectId}`
       );
     });
 
-    socket.on("typing", ({ senderId, receiverId }) => {
-      const receiverSocketId =
-        onlineUsers.get(receiverId);
+    socket.on("leave_project", (projectId) => {
+      socket.leave(projectId);
 
-      if (receiverSocketId) {
-        io.to(receiverSocketId).emit("userTyping", {
-          senderId,
-        });
-      }
+      console.log(
+        `${socket.id} left project ${projectId}`
+      );
     });
 
-    socket.on("stopTyping", ({ senderId, receiverId }) => {
-      const receiverSocketId =
-        onlineUsers.get(receiverId);
-
-      if (receiverSocketId) {
-        io.to(receiverSocketId).emit("userStoppedTyping", {
-          senderId,
-        });
-      }
-    });
-
+    // ==========================
+    // DISCONNECT
+    // ==========================
     socket.on("disconnect", () => {
-      for (const [userId, socketId] of onlineUsers.entries()) {
-        if (socketId === socket.id) {
-          onlineUsers.delete(userId);
-          break;
-        }
+      if (userId) {
+        delete userSocketMap[userId];
       }
 
-      console.log(`User Disconnected: ${socket.id}`);
+      console.log("User Disconnected:", socket.id);
     });
   });
-
-  return io;
 };
 
+// ==========================
+// GET SOCKET.IO INSTANCE
+// ==========================
 export const getIO = () => {
   if (!io) {
-    throw new Error("Socket.io not initialized");
+    throw new Error(
+      "Socket.io has not been initialized."
+    );
   }
 
   return io;
 };
 
+// ==========================
+// GET USER SOCKET ID
+// ==========================
 export const getReceiverSocketId = (userId) => {
-  return onlineUsers.get(userId);
+  return userSocketMap[userId];
 };
+
+export { io };

@@ -1,4 +1,27 @@
 import Notification from "../models/Notification.js";
+import { getIO, getReceiverSocketId } from "../socket/socket.js";
+
+/**
+ * SEND REAL-TIME NOTIFICATION
+ */
+export const sendRealtimeNotification = async (
+  recipient,
+  notification
+) => {
+  const receiverSocketId = getReceiverSocketId(
+    recipient.toString()
+  );
+
+  if (receiverSocketId) {
+    getIO()
+      .to(receiverSocketId)
+      .emit("newNotification", notification);
+
+    console.log(
+      `Notification sent to socket ${receiverSocketId}`
+    );
+  }
+};
 
 /**
  * GET MY NOTIFICATIONS

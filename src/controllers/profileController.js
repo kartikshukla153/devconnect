@@ -1,5 +1,4 @@
 import Profile from "../models/Profile.js";
-
 /**
  * CREATE OR UPDATE PROFILE
  */

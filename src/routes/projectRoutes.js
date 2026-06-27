@@ -14,7 +14,9 @@ import {
   getProjectDashboard,
   getProjectActivity,
 } from "../controllers/projectController.js";
+
 import authMiddleware from "../middleware/authMiddleware.js";
+import checkProjectRole from "../middleware/projectPermissionMiddleware.js";
 
 const router = express.Router();
 
@@ -36,11 +38,16 @@ router.get(
   authMiddleware,
   getProjectDashboard
 );
+
+/**
+ * PROJECT ACTIVITY
+ */
 router.get(
   "/activity/:projectId",
   authMiddleware,
   getProjectActivity
 );
+
 /**
  * GET SINGLE PROJECT
  */
@@ -102,10 +109,12 @@ router.put(
 
 /**
  * DELETE PROJECT
+ * ONLY OWNER CAN DELETE
  */
 router.delete(
   "/:id",
   authMiddleware,
+  checkProjectRole("owner"),
   deleteProject
 );
 

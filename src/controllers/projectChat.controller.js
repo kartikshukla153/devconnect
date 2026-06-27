@@ -1,6 +1,6 @@
 import Project from "../models/project.js";
 import ProjectMessage from "../models/ProjectMessage.js";
-
+import { getIO } from "../socket/socket.js";
 /**
  * SEND PROJECT MESSAGE
  */
@@ -37,6 +37,12 @@ export const sendProjectMessage = async (req, res) => {
     const populatedMessage =
       await ProjectMessage.findById(newMessage._id)
         .populate("sender", "name email");
+        getIO()
+  .to(projectId)
+  .emit(
+    "new_project_message",
+    populatedMessage
+  );
 
     return res.status(201).json({
       success: true,
