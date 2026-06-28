@@ -1,4 +1,5 @@
 import Profile from "../models/Profile.js";
+
 /**
  * CREATE OR UPDATE PROFILE
  */
@@ -59,7 +60,6 @@ export const createOrUpdateProfile = async (req, res) => {
       message: "Profile updated successfully",
       profile,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -88,7 +88,6 @@ export const getMyProfile = async (req, res) => {
       success: true,
       profile,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -117,7 +116,6 @@ export const getUserProfile = async (req, res) => {
       success: true,
       profile,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -140,7 +138,6 @@ export const getAllProfiles = async (req, res) => {
       count: profiles.length,
       profiles,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -150,25 +147,67 @@ export const getAllProfiles = async (req, res) => {
 };
 
 /**
- * SEARCH PROFILES BY SKILL
+ * SEARCH PROFILES
+ * Supports:
+ * skill
+ * name
+ * location
+ * availability
+ * page
+ * limit
  */
 export const searchProfilesBySkill = async (req, res) => {
   try {
-    const { skill } = req.query;
+    const {
+      skill,
+      name,
+      location,
+      availability,
+    } = req.query;
 
-    const profiles = await Profile.find({
-      skills: {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+
+    const filter = {};
+
+    if (skill) {
+      filter.skills = {
         $regex: skill,
         $options: "i",
-      },
-    }).populate("user", "name email");
+      };
+    }
+
+    if (location) {
+      filter.location = {
+        $regex: location,
+        $options: "i",
+      };
+    }
+
+    if (availability) {
+      filter.availability = availability;
+    }
+
+    let profiles = await Profile.find(filter)
+      .populate("user", "name email")
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    if (name) {
+      profiles = profiles.filter((profile) =>
+        profile.user.name
+          .toLowerCase()
+          .includes(name.toLowerCase())
+      );
+    }
 
     res.status(200).json({
       success: true,
+      page,
+      limit,
       count: profiles.length,
       profiles,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -222,7 +261,6 @@ export const addExperience = async (req, res) => {
       message: "Experience added successfully",
       profile,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -232,7 +270,7 @@ export const addExperience = async (req, res) => {
 };
 
 /**
- * DELETE EXPERIENCE (FIXED + SAFE VERSION)
+ * DELETE EXPERIENCE
  */
 export const deleteExperience = async (req, res) => {
   try {
@@ -276,7 +314,6 @@ export const deleteExperience = async (req, res) => {
       message: "Experience deleted successfully",
       profile,
     });
-
   } catch (error) {
     return res.status(500).json({
       success: false,
