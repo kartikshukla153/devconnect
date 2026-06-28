@@ -1,4 +1,8 @@
 import Notification from "../models/Notification.js";
+import {
+  getIO,
+  getReceiverSocketId,
+} from "../socket/socket.js";
 
 const createNotification = async ({
   recipient,
@@ -9,12 +13,6 @@ const createNotification = async ({
   relatedProject = null,
 }) => {
   try {
-    console.log("========== NOTIFICATION DEBUG ==========");
-    console.log("recipient:", recipient);
-    console.log("sender:", sender);
-    console.log("type:", type);
-    console.log("message:", message);
-
     const notification = await Notification.create({
       recipient,
       sender,
@@ -24,12 +22,17 @@ const createNotification = async ({
       relatedProject,
     });
 
-    console.log(
-      "Notification Created Successfully:",
-      notification._id
+    const receiverSocketId = getReceiverSocketId(
+      recipient.toString()
     );
 
-    console.log("========================================");
+    if (receiverSocketId) {
+      getIO()
+        .to(receiverSocketId)
+        .emit("newNotification", notification);
+    }
+
+    return notification;
   } catch (error) {
     console.log(
       "Notification Creation Error:",

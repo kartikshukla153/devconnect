@@ -153,14 +153,19 @@ export const getPendingRequests = async (req, res) => {
   }
 };
 
-/**
- * REJECT CONNECTION REQUEST
- */
 export const rejectConnectionRequest = async (req, res) => {
   try {
     const requesterId = req.params.userId;
 
     const currentUser = await User.findById(req.user._id);
+    const requester = await User.findById(requesterId);
+
+    if (!requester) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
 
     const requestExists = currentUser.connectionRequests.some(
       (id) => id.toString() === requesterId
@@ -179,6 +184,13 @@ export const rejectConnectionRequest = async (req, res) => {
       );
 
     await currentUser.save();
+
+    await createNotification({
+      recipient: requesterId,
+      sender: currentUser._id,
+      type: "connection_rejected",
+      message: `${currentUser.name} rejected your connection request`,
+    });
 
     return res.status(200).json({
       success: true,
@@ -261,9 +273,6 @@ export const getMyConnections = async (req, res) => {
   }
 };
 
-/**
- * REMOVE CONNECTION
- */
 export const removeConnection = async (req, res) => {
   try {
     const connectionId = req.params.userId;
@@ -288,6 +297,13 @@ export const removeConnection = async (req, res) => {
 
     await currentUser.save();
     await connectionUser.save();
+
+    await createNotification({
+      recipient: connectionUser._id,
+      sender: currentUser._id,
+      type: "connection_removed",
+      message: `${currentUser.name} removed you from their connections`,
+    });
 
     return res.status(200).json({
       success: true,
