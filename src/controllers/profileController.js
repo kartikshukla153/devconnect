@@ -155,6 +155,7 @@ export const getAllProfiles = async (req, res) => {
  * availability
  * page
  * limit
+ * sort=newest|oldest
  */
 export const searchProfilesBySkill = async (req, res) => {
   try {
@@ -163,6 +164,7 @@ export const searchProfilesBySkill = async (req, res) => {
       name,
       location,
       availability,
+      sort,
     } = req.query;
 
     const page = Number(req.query.page) || 1;
@@ -188,8 +190,19 @@ export const searchProfilesBySkill = async (req, res) => {
       filter.availability = availability;
     }
 
+    let sortOption = { createdAt: -1 };
+
+    if (sort === "oldest") {
+      sortOption = { createdAt: 1 };
+    }
+
+    if (sort === "newest") {
+      sortOption = { createdAt: -1 };
+    }
+
     let profiles = await Profile.find(filter)
       .populate("user", "name email")
+      .sort(sortOption)
       .skip((page - 1) * limit)
       .limit(limit);
 
@@ -201,13 +214,17 @@ export const searchProfilesBySkill = async (req, res) => {
       );
     }
 
-    res.status(200).json({
-      success: true,
-      page,
-      limit,
-      count: profiles.length,
-      profiles,
-    });
+   const totalProfiles = await Profile.countDocuments(filter);
+
+res.status(200).json({
+  success: true,
+  page,
+  limit,
+  totalProfiles,
+  totalPages: Math.ceil(totalProfiles / limit),
+  count: profiles.length,
+  profiles,
+});
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -215,7 +232,6 @@ export const searchProfilesBySkill = async (req, res) => {
     });
   }
 };
-
 /**
  * ADD EXPERIENCE
  */
