@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import Messages from "./pages/Messages";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -9,72 +10,91 @@ import AddExperience from "./pages/AddExperience";
 import Developers from "./pages/Developers";
 import PublicProfile from "./pages/PublicProfile";
 
+import ProtectedRoute from "./routes/ProtectedRoute";
+
+import useAuth from "./hooks/useAuth";
+
 function App() {
-  const token = localStorage.getItem("token");
+  const { isAuthenticated } = useAuth();
 
   return (
     <Routes>
-
-      {/* DEFAULT ROUTE */}
       <Route
         path="/"
         element={
-          token ? <Navigate to="/feed" /> : <Navigate to="/login" />
+          isAuthenticated ? (
+            <Navigate to="/feed" replace />
+          ) : (
+            <Navigate to="/login" replace />
+          )
         }
       />
 
-      {/* AUTH ROUTES */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* FEED */}
       <Route
         path="/feed"
         element={
-          token ? <Feed /> : <Navigate to="/login" />
+          <ProtectedRoute>
+            <Feed />
+          </ProtectedRoute>
         }
       />
 
-      {/* PROFILE */}
+      <Route
+  path="/messages"
+  element={
+    <ProtectedRoute>
+      <Messages />
+    </ProtectedRoute>
+  }
+/>
+
       <Route
         path="/profile"
         element={
-          token ? <Profile /> : <Navigate to="/login" />
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
         }
       />
 
-      {/* CREATE PROFILE */}
       <Route
         path="/create-profile"
         element={
-          token ? <CreateProfile /> : <Navigate to="/login" />
+          <ProtectedRoute>
+            <CreateProfile />
+          </ProtectedRoute>
         }
       />
 
-      {/* ADD EXPERIENCE */}
       <Route
         path="/add-experience"
         element={
-          token ? <AddExperience /> : <Navigate to="/login" />
+          <ProtectedRoute>
+            <AddExperience />
+          </ProtectedRoute>
         }
       />
 
-      {/* DEVELOPERS */}
       <Route
         path="/developers"
         element={
-          token ? <Developers /> : <Navigate to="/login" />
+          <ProtectedRoute>
+            <Developers />
+          </ProtectedRoute>
         }
       />
 
-      {/* PUBLIC PROFILE */}
       <Route
         path="/developers/:userId"
         element={
-          token ? <PublicProfile /> : <Navigate to="/login" />
+          <ProtectedRoute>
+            <PublicProfile />
+          </ProtectedRoute>
         }
       />
-
     </Routes>
   );
 }

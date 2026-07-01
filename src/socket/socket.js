@@ -2,10 +2,14 @@ import { Server } from "socket.io";
 
 let io;
 
-// Maps:
-// userId -> socketId
+// ==========================
+// USER ID -> SOCKET ID
+// ==========================
 const userSocketMap = {};
 
+// ==========================
+// INITIALIZE SOCKET
+// ==========================
 export const initializeSocket = (server) => {
   io = new Server(server, {
     cors: {
@@ -49,6 +53,31 @@ export const initializeSocket = (server) => {
     });
 
     // ==========================
+    // TYPING INDICATOR
+    // ==========================
+    socket.on("typing", ({ senderId, receiverId }) => {
+      const receiverSocketId =
+        userSocketMap[receiverId];
+
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("typing", {
+          senderId,
+        });
+      }
+    });
+
+    socket.on("stopTyping", ({ senderId, receiverId }) => {
+      const receiverSocketId =
+        userSocketMap[receiverId];
+
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("stopTyping", {
+          senderId,
+        });
+      }
+    });
+
+    // ==========================
     // DISCONNECT
     // ==========================
     socket.on("disconnect", () => {
@@ -75,7 +104,7 @@ export const getIO = () => {
 };
 
 // ==========================
-// GET USER SOCKET ID
+// GET SOCKET ID
 // ==========================
 export const getReceiverSocketId = (userId) => {
   return userSocketMap[userId];
