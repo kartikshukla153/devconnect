@@ -35,25 +35,15 @@ app.use(express.json());
 // =========================
 
 app.use("/api/auth", authRoutes);
-
 app.use("/api/posts", postRoutes);
-
 app.use("/api/profile", profileRoutes);
-
 app.use("/api/projects", projectRoutes);
-
 app.use("/api/tasks", taskRoutes);
-
 app.use("/api/connections", connectionRoutes);
-
 app.use("/api/messages", messageRoutes);
-
 app.use("/api/conversations", conversationRoutes);
-
 app.use("/api/search", searchRoutes);
-
 app.use("/api/notifications", notificationRoutes);
-
 app.use("/api/project-chat", projectChatRoutes);
 
 // =========================
